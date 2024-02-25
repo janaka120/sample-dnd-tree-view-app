@@ -1,24 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import {
+  Tree,
+  getBackendOptions,
+  MultiBackend,
+} from "@minoru/react-dnd-treeview";
+import { DndProvider } from "react-dnd";
+import initialData from "./sample-default.json";
 
 function App() {
+  const [treeData, setTreeData] = useState(initialData);
+  const handleDrop = (newTreeData) => setTreeData(newTreeData);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <DndProvider backend={MultiBackend} options={getBackendOptions()}>
+      <Tree
+        tree={treeData}
+        rootId={0}
+        onDrop={handleDrop}
+        sort={false}
+        canDrop={(tree, { dragSource, dropTargetId, dropTarget, dragSourceId, destinationIndex, monitor }) => {
+          if (dragSource?.parent === dropTargetId) {
+            return true;
+          }else {
+            return false;
+          }
+        }}
+        render={(node, { depth, isOpen, onToggle }) => (
+          <div style={{ marginLeft: depth * 10 }}>
+            {node.droppable && (
+              <span onClick={onToggle}>{isOpen ? "[-]" : "[+]"}</span>
+            )}
+            {node.text}
+          </div>
+        )}
+      />
+    </DndProvider>
   );
 }
 
